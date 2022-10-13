@@ -1,4 +1,5 @@
 import numpy as np
+import math
 
 def levenshtein_matriz(x, y, threshold=None):
     # esta versión no utiliza threshold, se pone porque se puede
@@ -19,7 +20,6 @@ def levenshtein_matriz(x, y, threshold=None):
 
 def levenshtein_edicion(x, y, threshold=None):
     # a partir de la versión levenshtein_matriz
-
     lenX, lenY = len(x), len(y)
     D = np.zeros((lenX + 1, lenY + 1), dtype=np.int)
     for i in range(1, lenX + 1):
@@ -66,6 +66,10 @@ def levenshtein_edicion(x, y, threshold=None):
 
 def levenshtein_reduccion(x, y, threshold=None):
     # completar versión con reducción coste espacial
+    # COMPLETAR
+    #----------------------------------------
+    #     REVISAR ESTA PARTE
+    # ---------------------------------------
     lenX, lenY = len(x), len(y)
     vcurrent = np.zeros(lenX + 1, lenY + 1)
     vnext = np.zeros(lenX + 1, lenY + 1)
@@ -76,11 +80,31 @@ def levenshtein_reduccion(x, y, threshold=None):
         for i in range(1, lenX + 1):
             vcurrent[i] = max(vprev[i], vprev[i])
         vprev, vcurrent = vcurrent, vprev
-    return vprev[lenX, lenY] # COMPLETAR Y REEMPLAZAR ESTA PARTE
+    return vprev[lenX, lenY] 
 
 def levenshtein(x, y, threshold):
     # completar versión reducción coste espacial y parada por threshold
-    return min(0,threshold+1) # COMPLETAR Y REEMPLAZAR ESTA PARTE
+     # COMPLETAR
+    lenX, lenY = len(x), len(y)
+    D = np.ones((lenX + 1, lenY + 1)) * np.inf #infinito positivo
+    for i in range(0, lenX + 1):
+        D[i, 0] = i
+    for j in range(0, lenY + 1):
+        D[0, j] = j
+    d = lenX / lenY
+    for i in range(1, lenX + 1):
+        colMin = np.inf
+        for j in range(max(math.floor(d*i-threshold), 1), min(math.ceil(d*i+threshold), lenY + 1)):
+            if x[i - 1] == y[j - 1]:
+                D[i, j] = min(D[i - 1, j] + 1, D[i, j - 1] + 1, D[i-1][j-1])
+            else:
+                D[i, j] = min(D[i - 1, j] + 1, D[i, j - 1] + 1, D[i-1][j-1] + 1)
+            if colMin > D[i,j]:
+                colMin = D[i,j]
+        if colMin > threshold:
+            return threshold+1
+            #return None
+    return D[lenX, lenY]
 
 def levenshtein_cota_optimista(x, y, threshold):
     return 0 # COMPLETAR Y REEMPLAZAR ESTA PARTE
