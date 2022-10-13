@@ -19,7 +19,50 @@ def levenshtein_matriz(x, y, threshold=None):
 
 def levenshtein_edicion(x, y, threshold=None):
     # a partir de la versión levenshtein_matriz
-    return 0,[] # COMPLETAR Y REEMPLAZAR ESTA PARTE
+
+    lenX, lenY = len(x), len(y)
+    D = np.zeros((lenX + 1, lenY + 1), dtype=np.int)
+    for i in range(1, lenX + 1):
+        D[i][0] = D[i - 1][0] + 1
+    for j in range(1, lenY + 1):
+        D[0][j] = D[0][j - 1] + 1
+        for i in range(1, lenX + 1):
+            D[i][j] = min(
+                D[i - 1][j] + 1,
+                D[i][j - 1] + 1,
+                D[i - 1][j - 1] + (x[i - 1] != y[j - 1]),
+            )
+    camino = []
+    indX = lenX
+    indY = lenY
+
+    while indX>0 or indY >0:
+        
+        xi = indX -1
+        yi = indY
+        c = D[xi,yi]
+        op = (x[xi], "")
+
+        if D[indX, indY -1] <= c:
+            xi = indX
+            yi = indY-1
+            c = D[xi,yi]
+            op = ("", y[yi])
+
+        if D[indX-1, indY-1] <= c:
+            xi = indX-1
+            yi = indY-1
+            c = D[xi,yi]
+            op = (x[xi], y[yi])    
+
+        camino.append(op)
+        indX = xi
+        indY = yi      
+
+    camino.reverse()
+
+    return D[lenX, lenY], camino
+
 
 def levenshtein_reduccion(x, y, threshold=None):
     # completar versión con reducción coste espacial
