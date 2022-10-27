@@ -66,24 +66,32 @@ def levenshtein_edicion(x, y, threshold=None):
 
 def levenshtein_reduccion(x, y, threshold=None):
     # completar versión con reducción coste espacial
+    #2. Implementar Levenshtein con reducción de coste espacial y con un
+    #parámetro umbral o threshold de modo que se pueda dejar de calcular
+    #cualquier distancia mayor a dicho umbral.
     # COMPLETAR
-    #----------------------------------------
-    #     REVISAR ESTA PARTE
-    # ---------------------------------------
+
     lenX, lenY = len(x), len(y)
-    vcurrent = np.zeros(lenX + 1, lenY + 1)
-    vnext = np.zeros(lenX + 1, lenY + 1)
+    vcurrent = np.zeros(lenX + 1, dtype=np.int)
+    vnext = np.zeros(lenX + 1, dtype=np.int)
     for i in range(1, lenX + 1):
-        vcurrent[0] = 0
+        vcurrent[0] = vcurrent[i - 1] + 1
     for j in range(1, lenY + 1):
-        vcurrent[j] = vprev[j]
+        vnext[0] = vcurrent[0] + 1
         for i in range(1, lenX + 1):
-            vcurrent[i] = max(vprev[i], vprev[i])
-        vprev, vcurrent = vcurrent, vprev
-    return vprev[lenX, lenY] 
+            vnext[0] = min(vcurrent[i] + 1, 
+                            vnext[i - 1] + 1, 
+                            vcurrent[i - 1] + (x[i - 1] != y[j - 1]),
+            )
+        vnext, vcurrent = vcurrent, vnext
+    return vcurrent[lenX] 
+
 
 def levenshtein(x, y, threshold):
     # completar versión reducción coste espacial y parada por threshold
+    #2. Implementar Levenshtein con reducción de coste espacial y con un
+    #parámetro umbral o threshold de modo que se pueda dejar de calcular
+    #cualquier distancia mayor a dicho umbral.
      # COMPLETAR
     lenX, lenY = len(x), len(y)
     D = np.ones((lenX + 1, lenY + 1)) * np.inf #infinito positivo
@@ -91,14 +99,14 @@ def levenshtein(x, y, threshold):
         D[i, 0] = i
     for j in range(0, lenY + 1):
         D[0, j] = j
-    d = lenX / lenY
-    for i in range(1, lenX + 1):
-        colMin = np.inf
-        for j in range(max(math.floor(d*i-threshold), 1), min(math.ceil(d*i+threshold), lenY + 1)):
-            if x[i - 1] == y[j - 1]:
-                D[i, j] = min(D[i - 1, j] + 1, D[i, j - 1] + 1, D[i-1][j-1])
-            else:
-                D[i, j] = min(D[i - 1, j] + 1, D[i, j - 1] + 1, D[i-1][j-1] + 1)
+        d = lenX / lenY
+        for i in range(max(math.floor(d*i-threshold), 1), min(math.ceil(d*i+threshold), lenX + 1)):
+            colMin = np.inf
+            D[i][j] = min(
+                D[i - 1][j] + 1,
+                D[i][j - 1] + 1,
+                D[i - 1][j - 1] + (x[i - 1] != y[j - 1]),
+            )
             if colMin > D[i,j]:
                 colMin = D[i,j]
         if colMin > threshold:
@@ -111,6 +119,10 @@ def levenshtein_cota_optimista(x, y, threshold):
 
 def damerau_restricted_matriz(x, y, threshold=None):
     # completar versión Damerau-Levenstein restringida con matriz
+    #2EXTRA. Implementar la versión restringida de Damerau-Levenstein
+    #(también con un parámetro umbral o threshold de modo que se pueda
+    #dejar de calcular cualquier distancia mayor a dicho umbral). Es
+    #automático que quede integrado en el recuperador.
     # COMPLETAR
     #----------------------------------------
     #     REVISAR ESTA PARTE
@@ -144,6 +156,10 @@ def damerau_restricted_edicion(x, y, threshold=None):
 
 def damerau_restricted(x, y, threshold):
     # versión con reducción coste espacial y parada por threshold
+    #2EXTRA.Implementar la versión restringida de Damerau-Levenstein
+    #(también con un parámetro umbral o threshold de modo que se pueda
+    #dejar de calcular cualquier distancia mayor a dicho umbral). Es
+    #automático que quede integrado en el recuperador.
      # COMPLETAR Y REEMPLAZAR ESTA PARTE
      #----------------------------------------
     #     REVISAR ESTA PARTE
