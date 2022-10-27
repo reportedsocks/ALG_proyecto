@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import re
 import numpy as np
+import distancias
 
 class SpellSuggester:
 
@@ -75,6 +76,13 @@ class SpellSuggester:
         ########################################
         # COMPLETAR
         ########################################
+
+        resul=[]
+        new_resul=[]
+        for palabra in self.vocabulary:
+            if distancias.levensthein_matriz(term, palabra,threshold)==thresold:
+                new_resul.append(palabra)
+        resul.append(new_resul)
             
         if flatten:
             resul = [word for wlist in resul for word in wlist]
