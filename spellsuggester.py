@@ -80,7 +80,7 @@ class SpellSuggester:
         resul=[]
         new_resul=[]
         for palabra in self.vocabulary:
-            if distancias.levensthein_matriz(term, palabra,threshold)==thresold:
+            if distancias.levensthein_matriz(term, palabra,threshold)==threshold:
                 new_resul.append(palabra)
         resul.append(new_resul)
             
