@@ -150,9 +150,61 @@ def damerau_restricted_matriz(x, y, threshold=None):
 
 
 def damerau_restricted_edicion(x, y, threshold=None):
-    # partiendo de damerau_restricted_matriz añadir recuperar
-    # secuencia de operaciones de edición
-    return 0,[] # COMPLETAR Y REEMPLAZAR ESTA PARTE
+    lenX, lenY = len(x), len(y)
+    D = np.zeros((lenX + 1, lenY + 1))
+    for i in range(1, lenX + 1):
+        D[i, 0] = i
+    for j in range(1, lenY + 1):
+        D[0, j] = j
+    for i in range(1, lenX + 1):
+        for j in range(1, lenY + 1):
+            if i > 1 and j > 1 and x[i - 2] == y[j - 1] and x[i - 1] == y[j - 2]:
+                if x[i - 1] == y[j - 1]:
+                    D[i, j] = min(D[i - 1, j] + 1, D[i, j - 1] + 1, D[i-1][j-1], D[i-2][j-2] + 1)
+                else:
+                    D[i, j] = min(D[i - 1, j] + 1, D[i, j - 1] + 1, D[i-1][j-1] + 1, D[i-2][j-2] + 1)
+            else:
+                if x[i - 1] == y[j - 1]:
+                    D[i, j] = min(D[i - 1, j] + 1, D[i, j - 1] + 1, D[i-1][j-1])
+                else:
+                    D[i, j] = min(D[i - 1, j] + 1, D[i, j - 1] + 1, D[i-1][j-1] + 1)
+    
+    camino = []
+    indX = lenX
+    indY = lenY
+
+    while indX>0 or indY >0:
+        
+        xi = indX -1
+        yi = indY
+        c = D[xi,yi]
+        op = (x[xi], "")
+
+        if D[indX, indY -1] <= c:
+            xi = indX
+            yi = indY-1
+            c = D[xi,yi]
+            op = ("", y[yi])
+
+        if D[indX-1, indY-1] <= c:
+            xi = indX-1
+            yi = indY-1
+            c = D[xi,yi]
+            op = (x[xi], y[yi])  
+
+        if D[indX-2, indY-2] <= c and x[indX-2]==y[indY-1] and x[indX-1]==y[indY-2]:
+            xi = indX-2
+            yi = indY-2
+            c = D[xi,yi]
+            op = (x[xi]+x[xi+1], y[yi]+y[yi+1])   
+
+        camino.append(op)
+        indX = xi
+        indY = yi      
+
+    camino.reverse()
+
+    return D[lenX, lenY], camino
 
 def damerau_restricted(x, y, threshold):
     # versión con reducción coste espacial y parada por threshold
