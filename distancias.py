@@ -213,7 +213,7 @@ def damerau_restricted(x, y, threshold):
     #dejar de calcular cualquier distancia mayor a dicho umbral). Es
     #automático que quede integrado en el recuperador.
      # COMPLETAR Y REEMPLAZAR ESTA PARTE
-     #----------------------------------------
+    #----------------------------------------
     #     REVISAR ESTA PARTE
     # ---------------------------------------
     lenX, lenY = len(x), len(y)
@@ -245,6 +245,31 @@ def damerau_restricted(x, y, threshold):
 
 def damerau_intermediate_matriz(x, y, threshold=None):
     # completar versión Damerau-Levenstein intermedia con matriz
+    #----------------------------------------
+    #     REVISAR ESTA PARTE
+    # ---------------------------------------
+    lenX, lenY = len(x), len(y)
+    D = np.zeros((lenX + 1, lenY + 1))
+    for i in range(1, lenX + 1):
+        D[i, 0] = i
+    for j in range(1, lenY + 1):
+        D[0, j] = j
+    for i in range(1, lenX + 1):
+        for j in range(1, lenY + 1):
+             minInit = 0
+            if x[i - 1] == y[j - 1]:
+                minInit = min(D[i-1, j] + 1, D[i, j-1] + 1, D[i-1][j-1])
+            else:
+                minInit = min(D[i-1, j] + 1, D[i, j-1] + 1, D[i-1][j-1] + 1)
+
+            if j > 1 and i > 1 and x[i - 2] == y[j - 1] and x[i - 1] == y[j - 2]:
+                D[i,j] = min(minInit, D[i-2][j-2] + 1)
+            elif j > 2 and i > 1 and x[i-2] == y[j-1] and x[i-1] == y[j-3]:
+                D[i,j] = min(minInit, D[i-2][j-3] + 2)
+            elif i > 2 and j > 1 and x[i - 3] == y[j-1] and x[i-1] == y[j-2]:
+                D[i,j] = min(minInit, D[i-3][j-2] + 2)
+            else:
+                D[i,j] = minInit
     return D[lenX, lenY]
 
 def damerau_intermediate_edicion(x, y, threshold=None):
@@ -253,9 +278,41 @@ def damerau_intermediate_edicion(x, y, threshold=None):
     # completar versión Damerau-Levenstein intermedia con matriz
     return 0,[] # COMPLETAR Y REEMPLAZAR ESTA PARTE
     
-def damerau_intermediate(x, y, threshold=None):
+def damerau_intermediate(x, y, threshold):
     # versión con reducción coste espacial y parada por threshold
-    return min(0,threshold+1) # COMPLETAR Y REEMPLAZAR ESTA PARTE
+    # COMPLETAR Y REEMPLAZAR ESTA PARTE
+    #----------------------------------------
+    #     REVISAR ESTA PARTE
+    # ---------------------------------------
+    lenX, lenY = len(x), len(y)
+    D = np.ones((lenX + 1, lenY + 1))*np.inf
+    for i in range(0, lenX + 1):
+        D[i, 0] = i
+    for j in range(0, lenY + 1):
+        D[0, j] = j
+    d = len(x)/len(y)
+    for i in range(1, lenX + 1):
+        colMin = np.inf
+        for j in range(max(math.floor(d*i-threshold), 1), min(math.ceil(d*i+threshold), lenY + 1)):
+             minInit = 0
+            if x[i - 1] == y[j - 1]:
+                minInit = min(D[i-1, j] + 1, D[i, j-1] + 1, D[i-1][j-1])
+            else:
+                minInit = min(D[i-1, j] + 1, D[i, j-1] + 1, D[i-1][j-1] + 1)
+
+            if j > 1 and i > 1 and x[i - 2] == y[j - 1] and x[i - 1] == y[j - 2]:
+                D[i,j] = min(minInit, D[i-2][j-2] + 1)
+            elif j > 2 and i > 1 and x[i-2] == y[j-1] and x[i-1] == y[j-3]:
+                D[i,j] = min(minInit, D[i-2][j-3] + 2)
+            elif i > 2 and j > 1 and x[i - 3] == y[j-1] and x[i-1] == y[j-2]:
+                D[i,j] = min(minInit, D[i-3][j-2] + 2)
+            else:
+                D[i,j] = minInit
+            if colMin > D[i,j]:
+                colMin = D[i,j]
+        if colMin > threshold:
+            return None
+    return D[lenX, lenY]
 
 opcionesSpell = {
     'levenshtein_m': levenshtein_matriz,
