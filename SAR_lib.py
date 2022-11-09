@@ -539,13 +539,13 @@ class SAR_Project:
         i=0
         pal=[]
         for t in self.index :
-          if(t != term):
+          if(t == term):
             aux = True
             break
           else :
             aux = False
         if(aux==False):
-          pal = self.speller(term)
+          pal = self.speller(self.suggest(term,None,None,True))
         if(pal):
           for term2 in pal:
             
