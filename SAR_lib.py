@@ -5,7 +5,7 @@ from operator import itemgetter
 from nltk.stem.snowball import SnowballStemmer
 import os
 import re
-
+import spellsuggester
 ## Equipo SAR compuesto por:
 ## Daniil Antsyferov
 ## Diego Garcia
@@ -74,7 +74,7 @@ class SAR_Project:
         self.use_spelling = False # valor por defecto, se cambia con self.set_spelling()
         self.distance = None # valor por defecto, se cambia con self.set_spelling()
         self.threshold = None # valor por defecto, se cambia con self.set_spelling()
-        self.speller = Spellsuggester
+        self.speller = self.spellsuggester
 
 
     ###############################
@@ -536,6 +536,7 @@ class SAR_Project:
         return: posting list
 
         """
+        self.set_vocabulary(self.index)
         i=0
         pal=[]
         for t in self.index :
