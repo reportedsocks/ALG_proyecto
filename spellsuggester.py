@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 import re
-import numpy as np
 import distancias
+#import numpy as np
+
 
 class SpellSuggester:
 
@@ -77,15 +78,36 @@ class SpellSuggester:
         # COMPLETAR
         ########################################
 
-        resul=[]
-        new_resul=[]
+        result=[]
+        new_result=[]
         for palabra in self.vocabulary:
-            if distancias.levensthein_matriz(term, palabra,threshold)==threshold:
-                new_resul.append(palabra)
-        resul.append(new_resul)
+            if distance=="levenshtein_m":
+                if distancias.levenshtein_matriz(term,palabra,threshold)==threshold:
+                    new_result.append(palabra)
+            if distance=="levenshtein_r":
+                if distancias.levenshtein_reduccion(term,palabra,threshold)==threshold:
+                    new_result.append(palabra)
+            if distance=="levenshtein":
+                if distancias.levenshtein(term,palabra,threshold)==threshold:
+                    new_result.append(palabra)
+            if distance=="levenshtein_o":
+                if distancias.levenshtein_cota_optimista(term,palabra,threshold)==threshold:
+                    new_result.append(palabra)
+            if distance=="damerau_rm":
+                if distancias.damerau_restricted_matriz(term,palabra,threshold)==threshold:
+                    new_result.append(palabra)
+            if distance=="damerau_r":
+                if distancias.damerau_restricted(term,palabra,threshold)==threshold:
+                    new_result.append(palabra)
+            if distance=="damerau_im":
+                if distancias.damerau_intermediate_matriz(term,palabra,threshold)==threshold:
+                    new_result.append(palabra)
+            if distance=="damerau_i":
+                if distancias.damerau_intermediate(term,palabra,threshold)==threshold:
+                    new_result.append(palabra)
             
         if flatten:
-            resul = [word for wlist in resul for word in wlist]
+            new_result = [word for wlist in result for word in wlist]
             
-        return resul
+        return new_result
 
