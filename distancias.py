@@ -120,9 +120,6 @@ def damerau_restricted_matriz(x, y, threshold=None):
     #dejar de calcular cualquier distancia mayor a dicho umbral). Es
     #automático que quede integrado en el recuperador.
     # COMPLETAR
-    #----------------------------------------
-    #     REVISAR ESTA PARTE
-    # ---------------------------------------
     lenX, lenY = len(x), len(y)
     D = np.zeros((lenX + 1, lenY + 1))
     for i in range(1, lenX + 1):
@@ -213,30 +210,33 @@ def damerau_restricted(x, y, threshold):
     #     REVISAR ESTA PARTE
     # ---------------------------------------
     lenX, lenY = len(x), len(y)
-    D = np.ones((lenX + 1, lenY + 1))*np.inf
-    for i in range(0, lenX + 1):
-        D[i, 0] = i
-    for j in range(0, len(y) + 1):
-        D[0, j] = j
-    d = lenX/lenY
-    for i in range(1, lenX + 1):
-        colMin = np.inf
-        for j in range(max(math.floor(d*i-threshold), 1), min(math.ceil(d*i+threshold), lenY + 1)):
-            if i > 1 and j > 1 and x[i - 2] == y[j - 1] and x[i - 1] == y[j - 2]:
-                if x[i - 1] == y[j - 1]:
-                    D[i, j] = min(D[i - 1, j] + 1, D[i, j - 1] + 1, D[i-1][j-1], D[i-2][j-2] + 1)
-                else:
-                    D[i, j] = min(D[i - 1, j] + 1, D[i, j - 1] + 1, D[i-1][j-1] + 1, D[i-2][j-2] + 1)
-            else:
-                if x[i - 1] == y[j - 1]:
-                    D[i, j] = min(D[i - 1, j] + 1, D[i, j - 1] + 1, D[i-1][j-1])
-                else:
-                    D[i, j] = min(D[i - 1, j] + 1, D[i, j - 1] + 1, D[i-1][j-1] + 1)
-            if colMin > D[i,j]:
-                colMin = D[i,j]
-        if colMin > threshold:
-            return None
-    return D[lenX, lenY]
+    vec1 = np.zeros(lenX + 1, dtype=np.int)
+    vec2 = np.zeros(lenX + 1, dtype=np.int)
+    vec3 = np.zeros(lenX + 1, dtype=np.int)
+    #D = np.ones((lenX + 1, lenY + 1))*np.inf
+    for i in range(lenY + 1):
+        vec1[i] = i
+    if lenX >= 1:
+        vec2[0] = 1
+        for i in range(1, lenY + 1):
+            vec2[i] = min(vec1[i] + 1,
+                          vec2[i-1] + 1,
+                          vec1[i-1] + (x[0] != y[i - 1]))
+        else: return lenY
+        if min(vec2) > threshold: return threshold+1
+        for col in range(2, lenX + 1):
+            vec3[0] = col
+            for fil in range(1, lenY + 1):
+                vec3[fil] = min(vec2[fil] +1,
+                                vec3[fil - 1] + 1,
+                                vec2[fil - 1] + (x[col - 1] != y[fil - 1]),
+                                vec1[fil - 2] + 1 
+                                    if x[col - 1] == y[fil - 2] and y[fil - 1] == x[col - 2] 
+                                    else 3)
+            vec1, vec2, vec3 = vec2, vec3, vec1
+            if min(vec2) > threshold: return threshold+1          
+    if vec2[lenY] > threshold: return threshold+1
+    return vec2[lenY]
 
 
 def damerau_intermediate_matriz(x, y, threshold=None):
@@ -281,34 +281,58 @@ def damerau_intermediate(x, y, threshold):
     #     REVISAR ESTA PARTE
     # ---------------------------------------
     lenX, lenY = len(x), len(y)
-    D = np.ones((lenX + 1, lenY + 1))*np.inf
-    for i in range(0, lenX + 1):
-        D[i, 0] = i
-    for j in range(0, lenY + 1):
-        D[0, j] = j
-    d = len(x)/len(y)
-    for i in range(1, lenX + 1):
-        colMin = np.inf
-        for j in range(max(math.floor(d*i-threshold), 1), min(math.ceil(d*i+threshold), lenY + 1)):
-             minInit = 0
-            if x[i - 1] == y[j - 1]:
-                minInit = min(D[i-1, j] + 1, D[i, j-1] + 1, D[i-1][j-1])
-            else:
-                minInit = min(D[i-1, j] + 1, D[i, j-1] + 1, D[i-1][j-1] + 1)
+    vec1 = np.zeros(lenX + 1, dtype=np.int)
+    vec2 = np.zeros(lenX + 1, dtype=np.int)
+    vec3 = np.zeros(lenX + 1, dtype=np.int)
+    vec4 = np.zeros(lenX + 1, dtype=np.int)
+    inf = 2**32 #2^32
+    for i in range(lenX + 1):
+        vec1[i] = i
+    if min(vec1) > threshold: return threshold+1
 
-            if j > 1 and i > 1 and x[i - 2] == y[j - 1] and x[i - 1] == y[j - 2]:
-                D[i,j] = min(minInit, D[i-2][j-2] + 1)
-            elif j > 2 and i > 1 and x[i-2] == y[j-1] and x[i-1] == y[j-3]:
-                D[i,j] = min(minInit, D[i-2][j-3] + 2)
-            elif i > 2 and j > 1 and x[i - 3] == y[j-1] and x[i-1] == y[j-2]:
-                D[i,j] = min(minInit, D[i-3][j-2] + 2)
-            else:
-                D[i,j] = minInit
-            if colMin > D[i,j]:
-                colMin = D[i,j]
-        if colMin > threshold:
-            return None
-    return D[lenX, lenY]
+    if lenX > 0:
+        vec2[0] = 1
+        for i in range(1, lenY + 1):
+            vec2[i] = min(vec1[i] + 1,
+                          vec2[i-1] + 1,
+                          vec1[i-1] + (x[i - 1] != y[j - 1]))
+        if min(vec2) > threshold: return threshold+1
+    else: return lenY
+
+    if lenX > 1:
+        vec3[0] = 2
+        for i in range (1, lenY + 1):
+            vec3[i] = min(vec2[i] + 1,
+                          vec3[i-1] + 1,
+                          vec2[i-1] + (0 if x[1] == y[i - 1] else 1),
+                          (vec1[i - 3] + 2) 
+                                if i > 2 and x[0] == y[i - 1] and x[1] == y[i - 3] 
+                                else inf,
+                          (vec1[i - 2] + 1) 
+                                if i > 1 and x[0] == y[i - 1] and x[1] == y[i - 2] 
+                                else inf)
+        if min(vec3) > threshold: return threshold+1
+    else: return lenY - (1 if x[0] == y[0] else 0)
+
+    for j in range(3, lenX + 1):
+        vec4[0] = j
+        for i in range(1, lenY + 1):
+            vec4[i] = min(vec3[i] + 1,
+                        vec4[i - 1] + 1,
+                        vec3[i - 1] + (x[i - 1] != y[j - 1]),
+                        (vec2[i - 3] + 2) 
+                                if i > 2 and x[j - 2] == y[i - 1] and x[j - 1] == y[i - 3] 
+                                else inf,
+                        (vec2[i - 2] + 1) 
+                                if i > 1 and x[j - 2] == y[i - 1] and x[j - 1] == y[i - 2] 
+                                else inf,
+                        (vec1[i - 2] + 2) 
+                                if i > 1 and x[j - 3] == y[i - 1] and x[j - 1] == y[i - 2] 
+                                else inf)
+        vec1, vec2, vec3, vec4 = vec2, vec3, vec4, vec1
+        if min(vec3) > threshold: return threshold + 1
+
+    return (vec3[lenY] if vec3[lenY] <= threshold else threshold + 1)
 
 opcionesSpell = {
     'levenshtein_m': levenshtein_matriz,
