@@ -252,7 +252,7 @@ def damerau_intermediate_matriz(x, y, threshold=None):
         D[0, j] = j
     for i in range(1, lenX + 1):
         for j in range(1, lenY + 1):
-             minInit = 0
+            minInit = 0
             if x[i - 1] == y[j - 1]:
                 minInit = min(D[i-1, j] + 1, D[i, j-1] + 1, D[i-1][j-1])
             else:
