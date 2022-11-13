@@ -206,19 +206,17 @@ def damerau_restricted(x, y, threshold):
     #dejar de calcular cualquier distancia mayor a dicho umbral). Es
     #automático que quede integrado en el recuperador.
      # COMPLETAR Y REEMPLAZAR ESTA PARTE
-    #----------------------------------------
-    #     REVISAR ESTA PARTE
-    # ---------------------------------------
     lenX, lenY = len(x), len(y)
-    vec1 = np.zeros(lenX + 1, dtype=np.int)
+    vec1 = np.zeros(lenX + 1, dtype=np.int) #(la fila anterior de las distancias)
     vec2 = np.zeros(lenX + 1, dtype=np.int)
-    vec3 = np.zeros(lenX + 1, dtype=np.int)
+    vec3 = np.zeros(lenX + 1, dtype=np.int) #(distancias de fila actuales) la calculamos con las filas previas vec0 y vec1
     #D = np.ones((lenX + 1, lenY + 1))*np.inf
     for i in range(lenY + 1):
         vec1[i] = i
     if lenX >= 1:
         vec2[0] = 1
         for i in range(1, lenY + 1):
+            #usamos la formula para completar vec2
             vec2[i] = min(vec1[i] + 1,
                           vec2[i-1] + 1,
                           vec1[i-1] + (x[0] != y[i - 1]))
@@ -227,13 +225,15 @@ def damerau_restricted(x, y, threshold):
         for col in range(2, lenX + 1):
             vec3[0] = col
             for fil in range(1, lenY + 1):
+                #usamos la formula para complecta vec3
                 vec3[fil] = min(vec2[fil] +1,
                                 vec3[fil - 1] + 1,
                                 vec2[fil - 1] + (x[col - 1] != y[fil - 1]),
                                 vec1[fil - 2] + 1 
                                     if x[col - 1] == y[fil - 2] and y[fil - 1] == x[col - 2] 
                                     else 3)
-            vec1, vec2, vec3 = vec2, vec3, vec1
+            #copia vec3 (fila actual) a vec2 (fila anterior) y vec2 a vec1 para la próxima iteración
+            vec1, vec2, vec3 = vec2, vec3, vec1 
             if min(vec2) > threshold: return threshold+1          
     if vec2[lenY] > threshold: return threshold+1
     return vec2[lenY]
