@@ -117,8 +117,8 @@ def levenshtein_cota_optimista(x, y, threshold):
     res = 0
 
     for letter in dic:
-        difference = x.count(letter) - y.count(letter)
-        res += abs(difference)
+        dif = x.count(letter) - y.count(letter)
+        res += abs(dif)
 
     if res >= threshold:
         return threshold+1
