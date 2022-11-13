@@ -80,6 +80,7 @@ class SpellSuggester:
 
         resul =[]
         newresul =[]
+        #nombres cogidos de levensthein_m
         for palabra in self.vocabulary:
             if distance=="levenshtein_m":
                 if distancias.levenshtein_matriz(term,palabra,threshold)==threshold:

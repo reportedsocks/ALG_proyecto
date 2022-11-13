@@ -79,7 +79,7 @@ def levenshtein_reduccion(x, y, threshold=None):
     for j in range(1, lenY + 1):
         vnext[0] = vcurrent[0] + 1
         for i in range(1, lenX + 1):
-            vnext[0] = min(vcurrent[i] + 1, 
+            vnext[i] = min(vcurrent[i] + 1, 
                             vnext[i - 1] + 1, 
                             vcurrent[i - 1] + (x[i - 1] != y[j - 1]),
             )
@@ -96,19 +96,18 @@ def levenshtein(x, y, threshold):
     lenX, lenY = len(x), len(y)
     vcurrent = np.zeros(lenX + 1, dtype=np.int)
     vnext = np.zeros(lenX + 1, dtype=np.int)
-    for i in range(1, lenX + 1):
-        vcurrent[0] = vcurrent[i - 1] + 1
-    for j in range(1, lenY + 1):
-        vnext[0] = vcurrent[0] + 1
-        for i in range(1, lenX + 1):
-            vnext[0] = min( vnext[i - 1] + 1, 
-                            vcurrent[i] + 1,
-                            vcurrent[i - 1] + (x[i - 1] != y[j - 1]),
-            )
+    for i in range(lenX + 1):
+        vcurrent[i] = i
+    for col in range(1, lenX + 1):
+        vnext[0] = col
+        for fil in range(1, lenY + 1):
+            vnext[fil] = min(vnext[fil - 1] + 1, 
+                            vcurrent[fil] + 1,
+                            vcurrent[i - 1] + (x[col - 1] != y[fil - 1]))
         vnext, vcurrent = vcurrent, vnext
         if min(vcurrent) > threshold: return threshold+1
     if vcurrent[lenY] > threshold: return threshold+1
-    return vcurrent[lenX]
+    return vcurrent[lenY]
 
 def levenshtein_cota_optimista(x, y, threshold):
     return 0 # COMPLETAR Y REEMPLAZAR ESTA PARTE
