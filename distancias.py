@@ -107,8 +107,8 @@ def levenshtein(x, y, threshold):
             vnext[i] = min(vnext[i - 1] + 1, 
                             vcurrent[i] + 1,
                             vcurrent[i - 1] + (x[i - 1] != y[j - 1]))
-        if(vnext[i] < threshold): paradaPorThreshold = False
-        elif(vnext[i] == threshold and lenX - i == lenY - j): paradaPorThreshold = False
+            if(vnext[i] < threshold): paradaPorThreshold = False
+            elif(vnext[i] == threshold and lenX - i == lenY - j): paradaPorThreshold = False
         if(paradaPorThreshold): return threshold+1
         vnext, vcurrent = vcurrent, vnext
     return vcurrent[lenX]
@@ -253,9 +253,6 @@ def damerau_restricted(x, y, threshold):
 
 def damerau_intermediate_matriz(x, y, threshold=None):
     # completar versión Damerau-Levenstein intermedia con matriz
-    #----------------------------------------
-    #     REVISAR ESTA PARTE
-    # ---------------------------------------
     lenX, lenY = len(x), len(y)
     D = np.zeros((lenX + 1, lenY + 1))
     for i in range(1, lenX + 1):
