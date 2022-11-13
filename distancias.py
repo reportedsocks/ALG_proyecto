@@ -110,7 +110,20 @@ def levenshtein(x, y, threshold):
     return vcurrent[lenY]
 
 def levenshtein_cota_optimista(x, y, threshold):
-    return 0 # COMPLETAR Y REEMPLAZAR ESTA PARTE
+    # COMPLETAR Y REEMPLAZAR ESTA PARTE
+    dic = set(x)
+    dic.update(set(y))
+
+    res = 0
+
+    for letter in dic:
+        difference = x.count(letter) - y.count(letter)
+        res += abs(difference)
+
+    if res >= threshold:
+        return threshold+1
+    else:
+        return levenshtein(x, y, threshold)
 
 def damerau_restricted_matriz(x, y, threshold=None):
     # completar versión Damerau-Levenstein restringida con matriz
