@@ -96,18 +96,22 @@ def levenshtein(x, y, threshold):
     lenX, lenY = len(x), len(y)
     vcurrent = np.zeros(lenX + 1, dtype=np.int)
     vnext = np.zeros(lenX + 1, dtype=np.int)
-    for i in range(lenX + 1):
-        vcurrent[i] = i
-    for col in range(1, lenX + 1):
-        vnext[0] = col
-        for fil in range(1, lenY + 1):
-            vnext[fil] = min(vnext[fil - 1] + 1, 
-                            vcurrent[fil] + 1,
-                            vcurrent[i - 1] + (x[col - 1] != y[fil - 1]))
+    for i in range(1, lenX + 1):
+        vcurrent[i] = vcurrent[i - 1] + 1
+    for j in range(1, lenY + 1):
+        vnext[0] = vcurrent[0] + 1
+        paradaPorThreshold = True
+        if(vnext[0] <= threshold): paradaPorThreshold = False
+        elif(vnext[0] == threshold and lenX - i == lenY - j): paradaPorThreshold = False
+        for i in range(1, lenX + 1):
+            vnext[i] = min(vnext[i - 1] + 1, 
+                            vcurrent[i] + 1,
+                            vcurrent[i - 1] + (x[i - 1] != y[j - 1]))
+        if(vnext[i] < threshold): paradaPorThreshold = False
+        elif(vnext[i] == threshold and lenX - i == lenY - j): paradaPorThreshold = False
+        if(paradaPorThreshold): return threshold+1
         vnext, vcurrent = vcurrent, vnext
-        if min(vcurrent) > threshold: return threshold+1
-    if vcurrent[lenY] > threshold: return threshold+1
-    return vcurrent[lenY]
+    return vcurrent[lenX]
 
 def levenshtein_cota_optimista(x, y, threshold):
     return 0 # COMPLETAR Y REEMPLAZAR ESTA PARTE
@@ -209,7 +213,6 @@ def damerau_restricted(x, y, threshold):
     vec1 = np.zeros(lenX + 1, dtype=np.int) #(la fila anterior de las distancias)
     vec2 = np.zeros(lenX + 1, dtype=np.int)
     vec3 = np.zeros(lenX + 1, dtype=np.int) #(distancias de fila actuales) la calculamos con las filas previas vec0 y vec1
-    #D = np.ones((lenX + 1, lenY + 1))*np.inf
     for i in range(lenY + 1):
         vec1[i] = i
     if lenX >= 1:
@@ -224,7 +227,7 @@ def damerau_restricted(x, y, threshold):
         for col in range(2, lenX + 1):
             vec3[0] = col
             for fil in range(1, lenY + 1):
-                #usamos la formula para complecta vec3
+                #usamos la formula para completar vec3
                 vec3[fil] = min(vec2[fil] +1,
                                 vec3[fil - 1] + 1,
                                 vec2[fil - 1] + (x[col - 1] != y[fil - 1]),
