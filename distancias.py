@@ -295,53 +295,32 @@ def damerau_intermediate(x, y, threshold):
     vec3 = np.zeros(lenX + 1, dtype=np.int)
     vec4 = np.zeros(lenX + 1, dtype=np.int)
     inf = 2**32 #2^32
-    for i in range(lenX + 1):
-        vec1[i] = i
-    if min(vec1) > threshold: return threshold+1
-
-    if lenX > 0:
-        vec2[0] = 1
-        for i in range(1, lenY + 1):
-            vec2[i] = min(vec1[i] + 1,
-                          vec2[i-1] + 1,
-                          vec1[i-1] + (x[i - 1] != y[j - 1]))
-        if min(vec2) > threshold: return threshold+1
-    else: return lenY
-
-    if lenX > 1:
-        vec3[0] = 2
-        for i in range (1, lenY + 1):
-            vec3[i] = min(vec2[i] + 1,
-                          vec3[i-1] + 1,
-                          vec2[i-1] + (0 if x[1] == y[i - 1] else 1),
-                          (vec1[i - 3] + 2) 
-                                if i > 2 and x[0] == y[i - 1] and x[1] == y[i - 3] 
-                                else inf,
-                          (vec1[i - 2] + 1) 
-                                if i > 1 and x[0] == y[i - 1] and x[1] == y[i - 2] 
-                                else inf)
-        if min(vec3) > threshold: return threshold+1
-    else: return lenY - (1 if x[0] == y[0] else 0)
-
-    for j in range(3, lenX + 1):
-        vec4[0] = j
-        for i in range(1, lenY + 1):
-            vec4[i] = min(vec3[i] + 1,
-                        vec4[i - 1] + 1,
-                        vec3[i - 1] + (x[i - 1] != y[j - 1]),
-                        (vec2[i - 3] + 2) 
-                                if i > 2 and x[j - 2] == y[i - 1] and x[j - 1] == y[i - 3] 
-                                else inf,
-                        (vec2[i - 2] + 1) 
-                                if i > 1 and x[j - 2] == y[i - 1] and x[j - 1] == y[i - 2] 
-                                else inf,
-                        (vec1[i - 2] + 2) 
-                                if i > 1 and x[j - 3] == y[i - 1] and x[j - 1] == y[i - 2] 
-                                else inf)
+    for i in range(1, lenX + 1):
+        vec1[i] = vec1[i - 1] + 1
+    for j in range(1, lenY + 1):
+        vec2[0] = vec1[0] + 1
+        paradaPorThreshold = True
+        if(vec2[0] <= threshold): paradaPorThreshold = False
+        elif(vec2[0] == threshold and lenX - i == lenY - j): paradaPorThreshold = False
+        for i in range(1, lenX + 1):
+            if(i > 1 and j > 1 and (x[i - 2] == y[j - 1]) and (x[i - 1] == y[j - 2])):
+            #usamos la formula para completar vec2
+                vec2[i] = min(vec1[i] + 1,
+                            vec2[i-1] + 1,
+                            vec1[i-1] + (x[i-1] != y[j - 1]),
+                            vec3[i - 2] + 1,
+                            vec4[i - 3] + 1)
+            else:
+                vec2[i] = min(vec1[i] + 1,
+                            vec2[i-1] + 1,
+                            vec1[i-1] + (x[i-1] != y[j - 1]))
+            if(vec2[i] < threshold): paradaPorThreshold = False
+            elif(vec2[i] == threshold and lenX - i == lenY - j): paradaPorThreshold = False
+        if(paradaPorThreshold): return threshold+1  
         vec1, vec2, vec3, vec4 = vec2, vec3, vec4, vec1
-        if min(vec3) > threshold: return threshold + 1
+    return vec1[lenX]
 
-    return (vec3[lenY] if vec3[lenY] <= threshold else threshold + 1)
+
 
 opcionesSpell = {
     'levenshtein_m': levenshtein_matriz,
