@@ -75,7 +75,7 @@ def levenshtein_reduccion(x, y, threshold=None):
     vcurrent = np.zeros(lenX + 1, dtype=np.int)
     vnext = np.zeros(lenX + 1, dtype=np.int)
     for i in range(1, lenX + 1):
-        vcurrent[0] = vcurrent[i - 1] + 1
+        vcurrent[i] = vcurrent[i - 1] + 1
     for j in range(1, lenY + 1):
         vnext[0] = vcurrent[0] + 1
         for i in range(1, lenX + 1):
@@ -307,6 +307,12 @@ def damerau_intermediate(x, y, threshold):
             #usamos la formula para completar vec2
                 vec2[i] = min(vec1[i] + 1,
                             vec2[i-1] + 1,
+                            vec1[i-1] + (x[i-1] != y[j - 1]),
+                            vec3[i - 2] + 1,
+                            vec4[i - 3] + 1)
+            elif j > 2 and i > 1 and x[i-2] == y[j-1] and x[i-1] == y[j-3]:
+                vec2[i] = min(vec1[i] + 1,
+                            vec2[i-2] + 1,
                             vec1[i-1] + (x[i-1] != y[j - 1]),
                             vec3[i - 2] + 1,
                             vec4[i - 3] + 1)
