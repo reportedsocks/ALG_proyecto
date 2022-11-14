@@ -312,10 +312,10 @@ def damerau_intermediate(x, y, threshold):
                             vec4[i - 3] + 1)
             elif j > 2 and i > 1 and x[i-2] == y[j-1] and x[i-1] == y[j-3]:
                 vec2[i] = min(vec1[i] + 1,
-                            vec2[i-2] + 1,
+                            vec2[i-1] + 1,
                             vec1[i-1] + (x[i-1] != y[j - 1]),
-                            vec3[i - 2] + 1,
-                            vec4[i - 3] + 1)
+                            vec3[i - 3] + 1,
+                            vec4[i - 4] + 1)
             else:
                 vec2[i] = min(vec1[i] + 1,
                             vec2[i-1] + 1,
