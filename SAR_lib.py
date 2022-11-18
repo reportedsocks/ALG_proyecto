@@ -5,7 +5,7 @@ from operator import itemgetter
 from nltk.stem.snowball import SnowballStemmer
 import os
 import re
-
+import spellsuggester
 ## Equipo SAR compuesto por:
 ## Daniil Antsyferov
 ## Diego Garcia
@@ -71,6 +71,10 @@ class SAR_Project:
         self.use_ranking = False  # valor por defecto, se cambia con self.set_ranking()
         self.newsNum = -1
         self.terminosSnippet = []
+        self.use_spelling = False # valor por defecto, se cambia con self.set_spelling()
+        self.distance = None # valor por defecto, se cambia con self.set_spelling()
+        self.threshold = None # valor por defecto, se cambia con self.set_spelling()
+        self.speller = spellsuggester
 
 
     ###############################
@@ -138,6 +142,26 @@ class SAR_Project:
 
         """
         self.use_ranking = v
+
+
+    ###############################
+    ###     PARTE 4: ALG        ###
+    ###############################
+
+    def set_spelling(self, use_spelling, distance, threshold):
+        """
+
+        self.use_spelling a True se activa la correccion ortografica
+
+        EN LAS PALABRAS NO ENCONTRADAS, en caso contrario NO utilizara
+
+        correccion ortografica
+
+        """
+
+        self.use_spelling = use_spelling
+        self.distance = distance
+        self.threshold = threshold
 
 
 
@@ -512,19 +536,50 @@ class SAR_Project:
         return: posting list
 
         """
+        spellsuggester.self.set_vocabulary(self.index)
+        i=0
+        pal=[]
+        for t in self.index :
+          if(t == term):
+            aux = True
+            break
+          else :
+            aux = False
+        if(aux==False):
+          pal = self.speller(self.suggest(term,None,None,True))
+        if(pal):
+          for term2 in pal:
+            
+
         ## Se devuelve la posting list del témino proporcionado o la lista vacia en caso de no existir
-        self.terminosSnippet.append(term)
-        res = []
-        if (self.stemming) :
-          listRes = self.get_stemming(term, field)
-          for it in listRes : 
-            res.extend(self.index.get(field).get(it,[]))
-        elif '*' in term or '?' in term:
-            print('* get_posting')
-            res = self.get_permuterm(term,field)
-        else : 
-          res = self.index.get(field).get(term,[])
-        return res
+            self.terminosSnippet.append(term2)
+            res = []
+            if (self.stemming) :
+              listRes = self.get_stemming(term2, field)
+              for it in listRes : 
+                res[i].extend(self.index.get(field).get(it,[]))
+            elif '*' in term2 or '?' in term2:
+                print('* get_posting')
+                res[i] = self.get_permuterm(term2,field)
+            else : 
+              res[i] = self.index.get(field).get(term2,[])
+            i+=1
+            return res
+        else: 
+          self.terminosSnippet.append(term)
+          res = []
+          if (self.stemming) :
+            listRes = self.get_stemming(term, field)
+            for it in listRes : 
+              res.extend(self.index.get(field).get(it,[]))
+          elif '*' in term or '?' in term:
+              print('* get_posting')
+              res = self.get_permuterm(term,field)
+          else : 
+            res = self.index.get(field).get(term,[])
+          return res
+
+        
 
 
 
