@@ -32,32 +32,42 @@ def levenshtein_edicion(x, y, threshold=None):
                 D[i][j - 1] + 1,
                 D[i - 1][j - 1] + (x[i - 1] != y[j - 1]),
             )
+
     camino = []
     indX = lenX
     indY = lenY
 
     while indX>0 or indY >0:
-        
-        xi = indX -1
+
+        c= max(len(x),len(y))*2 # '+infinity'
+        op = ("","")
+        xi = indX
         yi = indY
-        c = D[xi,yi]
-        op = (x[xi], "")
 
-        if D[indX, indY -1] <= c:
-            xi = indX
-            yi = indY-1
-            c = D[xi,yi]
-            op = ("", y[yi])
+        if indX > 0:
+            if D[indX-1, indY] <= c:
+                xi = indX -1
+                yi = indY
+                c = D[xi,yi]
+                op = (x[xi], "")
 
-        if D[indX-1, indY-1] <= c:
-            xi = indX-1
-            yi = indY-1
-            c = D[xi,yi]
-            op = (x[xi], y[yi])    
+        if indY > 0:       
+            if D[indX, indY -1] <= c:
+                xi = indX
+                yi = indY-1
+                c = D[xi,yi]
+                op = ("", y[yi])
+
+        if indX > 0 and indY > 0:
+            if D[indX-1, indY-1] <= c:
+                xi = indX-1
+                yi = indY-1
+                c = D[xi,yi]
+                op = (x[xi], y[yi])    
 
         camino.append(op)
         indX = xi
-        indY = yi      
+        indY = yi    
 
     camino.reverse()
 
@@ -188,29 +198,39 @@ def damerau_restricted_edicion(x, y, threshold=None):
     indY = lenY
 
     while indX>0 or indY >0:
-        
-        xi = indX -1
+
+        c= max(len(x),len(y))*2 # '+infinity'
+        op = ("","")
+        xi = indX
         yi = indY
-        c = D[xi,yi]
-        op = (x[xi], "")
 
-        if D[indX, indY -1] <= c:
-            xi = indX
-            yi = indY-1
-            c = D[xi,yi]
-            op = ("", y[yi])
+        if indX > 0:
+            if D[indX-1, indY] <= c:
+                xi = indX -1
+                yi = indY
+                c = D[xi,yi]
+                op = (x[xi], "")
 
-        if D[indX-1, indY-1] <= c:
-            xi = indX-1
-            yi = indY-1
-            c = D[xi,yi]
-            op = (x[xi], y[yi])  
+        if indY > 0:
+            if D[indX, indY -1] <= c:
+                xi = indX
+                yi = indY-1
+                c = D[xi,yi]
+                op = ("", y[yi])
 
-        if D[indX-2, indY-2] <= c and x[indX-2]==y[indY-1] and x[indX-1]==y[indY-2]:
-            xi = indX-2
-            yi = indY-2
-            c = D[xi,yi]
-            op = (x[xi]+x[xi+1], y[yi]+y[yi+1])   
+        if indX >0 and indY > 0:
+            if D[indX-1, indY-1] <= c:
+                xi = indX-1
+                yi = indY-1
+                c = D[xi,yi]
+                op = (x[xi], y[yi])  
+
+        if indX > 1 and indY > 1:
+            if D[indX-2, indY-2] <= c and x[indX-2]==y[indY-1] and x[indX-1]==y[indY-2]:
+                xi = indX-2
+                yi = indY-2
+                c = D[xi,yi]
+                op = (x[xi]+x[xi+1], y[yi]+y[yi+1])   
 
         camino.append(op)
         indX = xi
@@ -283,10 +303,90 @@ def damerau_intermediate_matriz(x, y, threshold=None):
     return D[lenX, lenY]
 
 def damerau_intermediate_edicion(x, y, threshold=None):
-    # partiendo de matrix_intermediate_damerau añadir recuperar
-    # secuencia de operaciones de edición
     # completar versión Damerau-Levenstein intermedia con matriz
-    return 0,[] # COMPLETAR Y REEMPLAZAR ESTA PARTE
+    lenX, lenY = len(x), len(y)
+    D = np.zeros((lenX + 1, lenY + 1))
+    for i in range(1, lenX + 1):
+        D[i, 0] = i
+    for j in range(1, lenY + 1):
+        D[0, j] = j
+    for i in range(1, lenX + 1):
+        for j in range(1, lenY + 1):
+            minInit = 0
+            if x[i - 1] == y[j - 1]:
+                minInit = min(D[i-1, j] + 1, D[i, j-1] + 1, D[i-1][j-1])
+            else:
+                minInit = min(D[i-1, j] + 1, D[i, j-1] + 1, D[i-1][j-1] + 1)
+
+            if j > 1 and i > 1 and x[i - 2] == y[j - 1] and x[i - 1] == y[j - 2]:
+                D[i,j] = min(minInit, D[i-2][j-2] + 1)
+            elif j > 2 and i > 1 and x[i-2] == y[j-1] and x[i-1] == y[j-3]:
+                D[i,j] = min(minInit, D[i-2][j-3] + 2)
+            elif i > 2 and j > 1 and x[i - 3] == y[j-1] and x[i-1] == y[j-2]:
+                D[i,j] = min(minInit, D[i-3][j-2] + 2)
+            else:
+                D[i,j] = minInit
+
+    camino = []
+    indX = lenX
+    indY = lenY
+
+    while indX>0 or indY >0:
+
+        c= max(len(x),len(y))*2 # '+infinity'
+        op = ("","")
+        xi = indX
+        yi = indY
+
+        if indX > 0:
+            if D[indX-1, indY] <= c:
+                xi = indX -1
+                yi = indY
+                c = D[xi,yi]
+                op = (x[xi], "")
+
+        if indY > 0:
+            if D[indX, indY -1] <= c:
+                xi = indX
+                yi = indY-1
+                c = D[xi,yi]
+                op = ("", y[yi])
+
+        if indX >0 and indY > 0:
+            if D[indX-1, indY-1] <= c:
+                xi = indX-1
+                yi = indY-1
+                c = D[xi,yi]
+                op = (x[xi], y[yi])  
+
+        if indX > 1 and indY > 1:
+            if D[indX-2, indY-2] <= c and x[indX-2]==y[indY-1] and x[indX-1]==y[indY-2]:
+                xi = indX-2
+                yi = indY-2
+                c = D[xi,yi]
+                op = (x[xi]+x[xi+1], y[yi]+y[yi+1])
+
+        if indX > 2 and indY > 1:
+            if D[indX-3, indY-2] <= c and x[indX-3]==y[indY-1] and x[indX-1]==y[indY-2]:
+                xi = indX-3
+                yi = indY-2
+                c = D[xi,yi]
+                op = (x[xi]+x[xi+1]+x[xi+2], y[yi]+y[yi+1]) 
+
+        if indX > 1 and indY > 2:
+            if D[indX-2, indY-3] <= c and x[indX-2]==y[indY-1] and x[indX-1]==y[indY-3]:
+                xi = indX-2
+                yi = indY-3
+                c = D[xi,yi]
+                op = (x[xi]+x[xi+1], y[yi]+y[yi+1]+y[yi+2])             
+
+        camino.append(op)
+        indX = xi
+        indY = yi      
+
+    camino.reverse()            
+
+    return D[lenX, lenY],camino # COMPLETAR Y REEMPLAZAR ESTA PARTE
     
 def damerau_intermediate(x, y, threshold):
     # versión con reducción coste espacial y parada por threshold
