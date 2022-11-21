@@ -391,15 +391,15 @@ def damerau_intermediate_edicion(x, y, threshold=None):
 def damerau_intermediate(x, y, threshold):
     # versión con reducción coste espacial y parada por threshold
     # COMPLETAR Y REEMPLAZAR ESTA PARTE
-    #----------------------------------------
-    #     REVISAR ESTA PARTE
-    # ---------------------------------------
     lenX, lenY = len(x), len(y)
+    #Se utilizan 4 vectores columna en vez de 3 debido a la dependencia ‘j-3’ que aparece
     vec1 = np.zeros(lenX + 1, dtype=np.int)
     vec2 = np.zeros(lenX + 1, dtype=np.int)
     vec3 = np.zeros(lenX + 1, dtype=np.int)
     vec4 = np.zeros(lenX + 1, dtype=np.int)
-    inf = 2**32 #2^32
+    reglaNum = 0
+    regla2Num = 0
+    regla3Num = 0
     for i in range(1, lenX + 1):
         vec1[i] = vec1[i - 1] + 1
     for j in range(1, lenY + 1):
@@ -409,26 +409,31 @@ def damerau_intermediate(x, y, threshold):
         elif(vec2[0] == threshold and lenX - i == lenY - j): paradaPorThreshold = False
         for i in range(1, lenX + 1):
             if(i > 1 and j > 1 and (x[i - 2] == y[j - 1]) and (x[i - 1] == y[j - 2])):
-            #usamos la formula para completar vec2
-                vec2[i] = min(vec1[i] + 1,
-                            vec2[i-1] + 1,
-                            vec1[i-1] + (x[i-1] != y[j - 1]),
-                            vec3[i - 2] + 1,
-                            vec4[i - 3] + 1)
-            elif j > 2 and i > 1 and x[i-2] == y[j-1] and x[i-1] == y[j-3]:
-                vec2[i] = min(vec1[i] + 1,
-                            vec2[i-1] + 1,
-                            vec1[i-1] + (x[i-1] != y[j - 1]),
-                            vec3[i - 3] + 1,
-                            vec4[i - 4] + 1)
+                reglaNum = vec3[i - 2] + 1
             else:
-                vec2[i] = min(vec1[i] + 1,
-                            vec2[i-1] + 1,
-                            vec1[i-1] + (x[i-1] != y[j - 1]))
+                reglaNum =  vec1[i] + 10
+            if(i > 2 and j > 1 and (x[i - 3] == y[j - 1]) and (x[i - 1] == y[j - 2])):
+                regla2Num = vec3[i - 3] + 2
+            else:
+                regla2Num =  vec1[i] + 10 #nunca es el minimo
+            if(i > 1 and j > 2 and (x[i - 1] == y[j - 3]) and (x[i - 2] == y[j - 1])):
+                regla3Num = vec4[i - 2] + 2
+            else:
+                regla3Num =  vec1[i] + 10 #nunca es el minimo
+            #usamos la formula para completar vec2
+            vec2[i] = min(
+                vec1[i] + 1,
+                vec2[i - 1] + 1,
+                vec1[i - 1] + (x[i - 1] != y[j - 1]),
+                reglaNum,
+                regla2Num,
+                regla3Num,
+            )
+
             if(vec2[i] < threshold): paradaPorThreshold = False
             elif(vec2[i] == threshold and lenX - i == lenY - j): paradaPorThreshold = False
         if(paradaPorThreshold): return threshold+1  
-        vec1, vec2, vec3, vec4 = vec2, vec3, vec4, vec1
+        vec1, vec2, vec3, vec4 = vec2, vec4, vec1, vec3
     return vec1[lenX]
 
 
