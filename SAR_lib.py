@@ -5,7 +5,8 @@ from operator import itemgetter
 from nltk.stem.snowball import SnowballStemmer
 import os
 import re
-import spellsuggester
+from spellsuggester import SpellSuggester
+import pickle
 ## Equipo SAR compuesto por:
 ## Daniil Antsyferov
 ## Diego Garcia
@@ -74,7 +75,7 @@ class SAR_Project:
         self.use_spelling = False # valor por defecto, se cambia con self.set_spelling()
         self.distance = None # valor por defecto, se cambia con self.set_spelling()
         self.threshold = None # valor por defecto, se cambia con self.set_spelling()
-        self.speller = spellsuggester
+        #self.speller = SpellSuggester()
 
 
     ###############################
@@ -536,34 +537,43 @@ class SAR_Project:
         return: posting list
 
         """
-        spellsuggester.self.set_vocabulary(self.index)
+        diccionario = []
+        res = []
+        for x in self.index[field]:
+            diccionario.append(x)
+        #print(diccionario)
+        speller = SpellSuggester(["levenshtein_m"])
+        speller.set_vocabulary(diccionario)
         i=0
         pal=[]
-        for t in self.index :
+        for t in diccionario:
           if(t == term):
             aux = True
             break
           else :
             aux = False
         if(aux==False):
-          pal = self.speller(self.suggest(term,None,None,True))
+          pal = speller.suggest(term,self.distance,self.threshold,False)
+          print(pal)
         if(pal):
-          for term2 in pal:
+            for term2 in pal:
             
 
         ## Se devuelve la posting list del témino proporcionado o la lista vacia en caso de no existir
-            self.terminosSnippet.append(term2)
-            res = []
-            if (self.stemming) :
-              listRes = self.get_stemming(term2, field)
-              for it in listRes : 
-                res[i].extend(self.index.get(field).get(it,[]))
-            elif '*' in term2 or '?' in term2:
-                print('* get_posting')
-                res[i] = self.get_permuterm(term2,field)
-            else : 
-              res[i] = self.index.get(field).get(term2,[])
-            i+=1
+                self.terminosSnippet.append(term2)
+                if (self.stemming) :
+                    listRes = self.get_stemming(term2, field)
+                    for it in listRes : 
+                        res.extend(self.index.get(field).get(it,[]))
+                elif '*' in term2 or '?' in term2:
+                    print('* get_posting')
+                    res = self.get_permuterm(term2,field)
+                else : 
+                #da error
+                    print(res)
+                    res.extend( self.index.get(field).get(term2,[]))
+                i+=1
+            print(res)
             return res
         else: 
           self.terminosSnippet.append(term)
